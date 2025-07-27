@@ -4,17 +4,17 @@ Human Activity Recognition (HAR) Project
 This project aims to recognize and classify human activities based on sensor data using machine learning techniques. It utilizes data from accelerometers and gyroscopes in smartphones to detect activities such as walking, sitting, standing, and more.
 
 ## 🧠 Project Overview
--Human Activity Recognition (HAR) is a key problem in fields like healthcare, fitness tracking, and smart environments. In this project, we:
+- Human Activity Recognition (HAR) is a key problem in fields like healthcare, fitness tracking, and smart environments. In this project, we:
 
--Collected or used a pre-existing HAR dataset
+- Collected or used a pre-existing HAR dataset
 
--Preprocessed and cleaned the data
+- Preprocessed and cleaned the data
 
--Built and trained machine learning and/or deep learning models
+- Built and trained machine learning and/or deep learning models
 
--Evaluated the model’s performance
+- Evaluated the model’s performance
 
--Visualized results
+- Visualized results
 
 ## 🚀 Features
 -Data preprocessing and feature engineering
