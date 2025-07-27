@@ -17,57 +17,57 @@ This project aims to recognize and classify human activities based on sensor dat
 - Visualized results
 
 ## 🚀 Features
--Data preprocessing and feature engineering
+- Data preprocessing and feature engineering
 
--Activity classification using ML/DL models
+- Activity classification using ML/DL models
 
--Accuracy and performance visualization
+- Accuracy and performance visualization
 
--Support for adding new datasets and activity types
+- Support for adding new datasets and activity types
 
 ## 📂 Dataset
 The project uses the UCI HAR Dataset (or mention your own dataset if used). It includes data from smartphone sensors collected from multiple subjects performing daily activities.
--Activities classified:
+- Activities classified:
 
--Walking
+- Walking
 
-  -Walking Upstairs
+  - Walking Upstairs
 
- -Walking Downstairs
+ - Walking Downstairs
 
--Sitting
+- Sitting
 
--Standing
+- Standing
 
--Laying
+- Laying
 
  ## 🛠️ Tech Stack
--Python
+- Python
 
--NumPy, Pandas
+- NumPy, Pandas
 
--Scikit-learn
+- Scikit-learn
 
--TensorFlow / Keras (if deep learning used)
+- TensorFlow / Keras (if deep learning used)
 
--Matplotlib / Seaborn for visualization
+- Matplotlib / Seaborn for visualization
 
--Jupyter Notebook (for experiments)
+- Jupyter Notebook (for experiments)
 
 ## 📈 Model Performance
--Model	Accuracy
--Logistic Regression	89.5%
--Random Forest	93.2%
--LSTM (Deep Learning)	95.6%
+- Model	Accuracy
+- Logistic Regression	89.5%
+- Random Forest	93.2%
+- LSTM (Deep Learning)	95.6%
 
 (Note: Replace these with your actual results)
 
 ## 📊 Results
--Confusion matrix
+- Confusion matrix
 
--Accuracy and loss plots
+- Accuracy and loss plots
 
--Activity classification report
+- Activity classification report
 
 
 ## 🔧 How to Run
@@ -85,11 +85,11 @@ The project uses the UCI HAR Dataset (or mention your own dataset if used). It i
      python train_model.py
 
 ## 📚 Future Work
-Real-time activity prediction using mobile device
+- Real-time activity prediction using mobile device
 
-Model optimization for embedded systems
+- Model optimization for embedded systems
 
-Integration with wearable devices
+- Integration with wearable devices
 
 ## 🤝 Contributing
 Contributions, issues, and feature requests are welcome! Feel free to check issues page.
