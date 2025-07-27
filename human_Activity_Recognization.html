@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Human Activity RecognizerV</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #ffffff;
+    }
+
+    .container {
+      text-align: center;
+    }
+
+    #video {
+      display: none;
+    }
+
+    #output {
+      border: 1px solid #ddd;
+    }
+
+    #activity {
+      font-size: 24px;
+      margin-top: 20px;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/posenet"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Human Activity Recognizer</h1>
+    <video id="video" width="640" height="480" autoplay></video>
+    <canvas id="output" width="640" height="480"></canvas>
+    <p id="activity">Activity: Unknown</p>
+  </div>
+  <script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('output');
+    const ctx = canvas.getContext('2d');
+    const activityElement = document.getElementById('activity');
+    
+    let net;
+
+    async function setupCamera() {
+      video.width = 640;
+      video.height = 480;
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'user' } // Use front camera
+      });
+      video.srcObject = stream;
+
+      return new Promise((resolve) => {
+        video.onloadedmetadata = () => {
+          resolve(video);
+        };
+      });
+    }
+
+    async function loadPosenet() {
+      net = await posenet.load();
+      detectPose();
+    }
+
+    async function detectPose() {
+      const pose = await net.estimateSinglePose(video, {
+        flipHorizontal: false
+      });
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      pose.keypoints.forEach(point => {
+        if (point.score > 0.5) {
+          ctx.beginPath();
+          ctx.arc(point.position.x, point.position.y, 5, 0, 2 * Math.PI);
+          ctx.fillStyle = 'red';
+          ctx.fill();
+        }
+      });
+
+      recognizeActivity(pose);
+      requestAnimationFrame(detectPose);
+    }
+
+    function recognizeActivity(pose) {
+      const keypoints = pose.keypoints.reduce((acc, point) => {
+        acc[point.part] = point;
+        return acc;
+      }, {});
+
+      const { leftKnee, rightKnee, leftShoulder, rightShoulder, leftWrist, rightWrist, leftElbow, rightElbow, leftHip, rightHip, leftAnkle, rightAnkle } = keypoints;
+
+      if (leftKnee && rightKnee && leftShoulder && rightShoulder && leftWrist && rightWrist) {
+        const kneeY = (leftKnee.position.y + rightKnee.position.y) / 2;
+        const shoulderY = (leftShoulder.position.y + rightShoulder.position.y) / 2;
+        const wristY = (leftWrist.position.y + rightWrist.position.y) / 2;
+        const elbowY = (leftElbow.position.y + rightElbow.position.y) / 2;
+        const hipY = (leftHip.position.y + rightHip.position.y) / 2;
+        const ankleY = (leftAnkle.position.y + rightAnkle.position.y) / 2;
+
+        let activity = 'Unknown';
+
+        // Recognize activities based on keypoints
+        if (kneeY > shoulderY + 100) {
+          activity = 'Sitting';
+        } else if (wristY < shoulderY) {
+          activity = 'Raising Hands';
+        } else {
+          activity = 'Standing';
+        }
+
+        // More specific activities
+        if (leftWrist.position.y < leftElbow.position.y && rightWrist.position.y < rightElbow.position.y) {
+          activity = 'Hands Up';
+        }
+        if (leftKnee.position.y > leftHip.position.y && rightKnee.position.y > rightHip.position.y) {
+          activity = 'Crouching';
+        }
+        if (leftAnkle.position.y < leftHip.position.y && rightAnkle.position.y < rightHip.position.y) {
+          activity = 'Jumping';
+        }
+        
+        // Adding more activities
+        // Agriculture
+        if (activity === 'Standing' && wristY > hipY) {
+          activity = 'Farming';
+        } else if (activity === 'Standing' && wristY < hipY - 50) {
+          activity = 'Animal Husbandry';
+        } else if (activity === 'Standing' && elbowY > hipY) {
+          activity = 'Horticulture';
+        } else if (activity === 'Standing' && shoulderY > hipY) {
+          activity = 'Aquaculture';
+        }
+
+        // Industry
+        if (activity === 'Standing' && elbowY < hipY - 50) {
+          activity = 'Manufacturing';
+        } else if (activity === 'Standing' && wristY > shoulderY) {
+          activity = 'Mining';
+        } else if (activity === 'Standing' && kneeY > shoulderY) {
+          activity = 'Construction';
+        } else if (activity === 'Standing' && ankleY < hipY) {
+          activity = 'Utilities';
+        }
+
+        // Services
+        if (activity === 'Standing' && wristY > hipY) {
+          activity = 'Healthcare';
+        } else if (activity === 'Sitting' && wristY < shoulderY) {
+          activity = 'Education';
+        } else if (activity === 'Standing' && elbowY > shoulderY) {
+          activity = 'Banking';
+        } else if (activity === 'Standing' && kneeY < shoulderY) {
+          activity = 'Retail';
+        }
+
+        // Trade
+        if (activity === 'Standing' && shoulderY > kneeY) {
+          activity = 'Importing';
+        } else if (activity === 'Standing' && wristY < shoulderY) {
+          activity = 'Exporting';
+        } else if (activity === 'Standing' && elbowY < kneeY) {
+          activity = 'Wholesale';
+        } else if (activity === 'Standing' && wristY > kneeY) {
+          activity = 'Retail Trade';
+        }
+
+        // Education
+        if (activity === 'Sitting' && wristY < elbowY) {
+          activity = 'Attending School';
+        } else if (activity === 'Sitting' && shoulderY > elbowY) {
+          activity = 'Teaching';
+        } else if (activity === 'Sitting' && elbowY < wristY) {
+          activity = 'Studying';
+        }
+
+        // Healthcare
+        if (activity === 'Standing' && shoulderY > wristY) {
+          activity = 'Medical Treatment';
+        } else if (activity === 'Sitting' && elbowY > wristY) {
+          activity = 'Nursing';
+        } else if (activity === 'Standing' && elbowY < shoulderY) {
+          activity = 'Health Education';
+        }
+
+        // Recreation
+        if (activity === 'Standing' && kneeY < hipY) {
+          activity = 'Sports';
+        } else if (activity === 'Sitting' && wristY < shoulderY) {
+          activity = 'Hobbies';
+        } else if (activity === 'Standing' && wristY < elbowY) {
+          activity = 'Travel';
+        } else if (activity === 'Standing' && shoulderY < elbowY) {
+          activity = 'Entertainment';
+        }
+
+        // Volunteering
+        if (activity === 'Standing' && wristY > shoulderY) {
+          activity = 'Volunteering';
+        } else if (activity === 'Sitting' && elbowY < kneeY) {
+          activity = 'Social Work';
+        } else if (activity === 'Standing' && shoulderY > wristY) {
+          activity = 'Community Organizing';
+        }
+
+        // Arts
+        if (activity === 'Sitting' && wristY < elbowY) {
+          activity = 'Painting';
+        } else if (activity === 'Sitting' && elbowY < kneeY) {
+          activity = 'Sculpture';
+        } else if (activity === 'Standing' && shoulderY > elbowY) {
+          activity = 'Theater';
+        }
+
+        // Traditions
+        if (activity === 'Standing' && kneeY < elbowY) {
+          activity = 'Festivals';
+        } else if (activity === 'Standing' && shoulderY > kneeY) {
+          activity = 'Rituals';
+        } else if (activity === 'Standing' && wristY > shoulderY) {
+          activity = 'Ceremonies';
+        }
+
+        // Handicrafts
+        // Handicrafts
+        if (activity === 'Sitting' && elbowY > wristY) {
+          activity = 'Handicrafts';
+        } else if (activity === 'Sitting' && kneeY > shoulderY) {
+          activity = 'Pottery';
+        } else if (activity === 'Sitting' && wristY < elbowY) {
+          activity = 'Weaving';
+        }
+
+        // Environmental Activities
+        if (activity === 'Standing' && shoulderY < elbowY) {
+          activity = 'Wildlife Preservation';
+        } else if (activity === 'Standing' && elbowY < kneeY) {
+          activity = 'Forest Management';
+        } else if (activity === 'Standing' && kneeY < ankleY) {
+          activity = 'Water Conservation';
+        } else if (activity === 'Standing' && wristY > kneeY) {
+          activity = 'Waste Management';
+        } else if (activity === 'Standing' && elbowY < kneeY) {
+          activity = 'Recycling';
+        } else if (activity === 'Standing' && shoulderY > wristY) {
+          activity = 'Emissions Reduction';
+        } else if (activity === 'Standing' && wristY < shoulderY) {
+          activity = 'Sustainable Practices';
+        }
+
+        // Policy and Administration
+        if (activity === 'Standing' && elbowY > shoulderY) {
+          activity = 'Policy Making';
+        } else if (activity === 'Sitting' && wristY > shoulderY) {
+          activity = 'Administration';
+        } else if (activity === 'Standing' && shoulderY > kneeY) {
+          activity = 'Public Service';
+        }
+
+        // Advocacy and Elections
+        if (activity === 'Standing' && wristY < elbowY) {
+          activity = 'Protests';
+        } else if (activity === 'Standing' && elbowY > kneeY) {
+          activity = 'Campaigns';
+        } else if (activity === 'Standing' && kneeY < shoulderY) {
+          activity = 'Advocacy';
+        } else if (activity === 'Standing' && wristY < kneeY) {
+          activity = 'Voting';
+        } else if (activity === 'Standing' && elbowY < shoulderY) {
+          activity = 'Political Organizing';
+        }
+
+        // Technological Activities
+        if (activity === 'Sitting' && elbowY > shoulderY) {
+          activity = 'Research and Development';
+        } else if (activity === 'Sitting' && wristY < elbowY) {
+          activity = 'Invention';
+        } else if (activity === 'Sitting' && kneeY > shoulderY) {
+          activity = 'Engineering';
+        } else if (activity === 'Sitting' && wristY > elbowY) {
+          activity = 'Telecommunication';
+        } else if (activity === 'Standing' && shoulderY < elbowY) {
+          activity = 'Internet Use';
+        } else if (activity === 'Standing' && elbowY > kneeY) {
+          activity = 'Social Media';
+        } else if (activity === 'Standing' && wristY < shoulderY) {
+          activity = 'Driving';
+        } else if (activity === 'Standing' && shoulderY > wristY) {
+          activity = 'Flying';
+        } else if (activity === 'Standing' && elbowY > kneeY) {
+          activity = 'Shipping';
+        }
+
+        // Domestic Activities
+        if (activity === 'Sitting' && elbowY < shoulderY) {
+          activity = 'Household Management';
+        } else if (activity === 'Sitting' && wristY > elbowY) {
+          activity = 'Cleaning';
+        } else if (activity === 'Standing' && elbowY > kneeY) {
+          activity = 'Cooking';
+        } else if (activity === 'Standing' && shoulderY < elbowY) {
+          activity = 'Maintenance';
+        } else if (activity === 'Sitting' && wristY < kneeY) {
+          activity = 'Childcare';
+        } else if (activity === 'Sitting' && elbowY < shoulderY) {
+          activity = 'Parenting';
+        } else if (activity === 'Standing' && shoulderY > wristY) {
+          activity = 'Education';
+        } else if (activity === 'Sitting' && kneeY > elbowY) {
+          activity = 'Caregiving';
+        } else if (activity === 'Standing' && wristY > shoulderY) {
+          activity = 'Gardening';
+        }
+
+        // Religious Activities
+        if (activity === 'Standing' && shoulderY > elbowY) {
+          activity = 'Worship';
+        } else if (activity === 'Sitting' && elbowY > kneeY) {
+          activity = 'Prayer';
+        } else if (activity === 'Sitting' && wristY < elbowY) {
+          activity = 'Meditation';
+        } else if (activity === 'Standing' && shoulderY < elbowY) {
+          activity = 'Rituals';
+        } else if (activity === 'Standing' && elbowY < kneeY) {
+          activity = 'Ceremonies';
+        } else if (activity === 'Sitting' && wristY < shoulderY) {
+          activity = 'Religious Study';
+        }
+
+        // Leisure Activities
+        if (activity === 'Standing' && elbowY > wristY) {
+          activity = 'Sports';
+        } else if (activity === 'Sitting' && wristY < elbowY) {
+          activity = 'Games';
+        } else if (activity === 'Sitting' && shoulderY < kneeY) {
+          activity = 'Arts and Crafts';
+        } else if (activity === 'Sitting' && wristY > elbowY) {
+          activity = 'DIY Projects';
+        }
+
+        // Informal Activities
+        if (activity === 'Sitting' && wristY > shoulderY) {
+          activity = 'Socializing';
+        } else if (activity === 'Sitting' && elbowY < kneeY) {
+          activity = 'Resting';
+        } else if (activity === 'Standing' && wristY < elbowY) {
+          activity = 'Personal Care';
+        }
+
+        activityElement.textContent = `Activity: ${activity}`;
+      } else {
+        activityElement.textContent = 'Activity: Unknown';
+      }
+    }
+
+    async function init() {
+      await setupCamera();
+      loadPosenet();
+    }
+
+    init();
+  </script>
+</body>
+</html>
