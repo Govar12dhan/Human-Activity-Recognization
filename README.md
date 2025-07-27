@@ -75,11 +75,12 @@ The project uses the UCI HAR Dataset (or mention your own dataset if used). It i
  ```bash
    git clone https://github.com/<your-username>/human-activity-recognization.git
    cd human-activity-recognization
-''' bash
+```bash
    
 2. Install dependencies:
    ```bash
      pip install -r requirements.txt
+
 
 3. Run the training script or notebook:
   ```bash
