@@ -78,13 +78,14 @@ The project uses the UCI HAR Dataset (or mention your own dataset if used). It i
 ```
    
 2. Install dependencies:
-   ```bash
-     pip install -r requirements.txt
-
+ ```bash
+    pip install -r requirements.txt
+```
 
 3. Run the training script or notebook:
-  ```bash
-     python train_model.py
+ ```bash
+    python train_model.py
+ ```
 
 ## 📚 Future Work
 - Real-time activity prediction using mobile device
