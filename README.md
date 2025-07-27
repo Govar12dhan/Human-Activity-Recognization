@@ -33,7 +33,7 @@ The project uses the UCI HAR Dataset (or mention your own dataset if used). It i
 
   - Walking Upstairs
 
- - Walking Downstairs
+  - Walking Downstairs
 
 - Sitting
 
@@ -75,7 +75,9 @@ The project uses the UCI HAR Dataset (or mention your own dataset if used). It i
  ```bash
    git clone https://github.com/<your-username>/human-activity-recognizer.git
    cd human-activity-recognizer
-   cd..
+  ```exit
+
+   
 2. Install dependencies:
    ```bash
      pip install -r requirements.txt
