@@ -75,7 +75,7 @@ The project uses the UCI HAR Dataset (or mention your own dataset if used). It i
  ```bash
    git clone https://github.com/<your-username>/human-activity-recognizer.git
    cd human-activity-recognizer
-
+   exit
 Install dependencies:
 
 pip install -r requirements.txt
